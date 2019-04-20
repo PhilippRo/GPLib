@@ -12,11 +12,38 @@ class Data:
         else:
             raise ValueError("Symbol string may not contain spaces")
 
-    def __add__
+    def get_sympy_expr():
+        return self.symbol
 
-class Expression():
+    def __add__(self, lhs):
+        expr = ExpressionAdd(self, lhs)
+        expr.add_symbol(self.symbol)
 
-    def unite_symbols(self, lhs, rhs):
+    def __sub__(self, lhs):
+        expr = ExpressionSub(self, lhs)
+        expr.add_symbol(self.symbol)
+
+    def __mul__(self, lhs):
+        expr = ExpressionMul(self, lhs)
+        expr.add_symbol(self.symbol)
+
+    def __div___(self, lhs):
+        expr = ExpressionDiv(self, lhs)
+        expr.add_symbol(self.symbol)
+
+    def __pow__(self, lhs):
+        expr = ExpressionPow(self, lhs)
+        expr.add_symbol(self.symbol)
+
+
+
+class Expression:
+
+    def add_symbol(self, sym):
+        if sym not in self.symbols:
+            self.symbols.append(sym)
+
+    def unite_symbols(self, rhs):
         self.symbols = lhs.append(
             [x for x in lhs.symbols if x not in rhs.symbols])
 
@@ -42,6 +69,10 @@ class ExpressionAdd(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
+        self.unite_symbols()
+
+    def get_sympy_expr(self):
+        return self.lhs.get_sympy_expr + self.rhs.get_sympy_expr
 
 
 
@@ -50,6 +81,10 @@ class ExpressionSub(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
+        self.unite_symbols()
+
+    def get_sympy_expr(self):
+        return self.lhs.get_sympy_expr - self.rhs.get_sympy_expr
 
 
 
@@ -58,7 +93,10 @@ class ExpressionMul(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
+        self.unite_symbols()
 
+    def get_sympy_expr(self):
+        return self.lhs.get_sympy_expr * self.rhs.get_sympy_expr
 
 
 class ExpressionDiv(Expression):
@@ -66,7 +104,10 @@ class ExpressionDiv(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
+        self.unite_symbols()
 
+    def get_sympy_expr(self):
+        return self.lhs.get_sympy_expr / self.rhs.get_sympy_expr
 
 
 class ExpressionPow(Expression):
@@ -74,7 +115,37 @@ class ExpressionPow(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
+        self.unite_symbols()
 
+    def get_sympy_expr(self):
+        return self.lhs.get_sympy_expr ** self.rhs.get_sympy_expr
 
+def GPLog(arg):
+    return ExpressionLog(arg)
 
+class ExpressionLog(Expression):
 
+    def __init__(self, expr):
+        self.expr = expr
+        if type(expr) == Data:
+            self.symbols = [expr.symbol]
+        else:
+            self.symbols = symbols
+
+    def get_sympy_expr(self):
+        return log(self.expr.get_sympy_expr())
+
+def GPSin(arg):
+    return ExpressionSin(arg)
+
+class ExpressionSin(Expression):
+
+    def __init__(self, expr):
+        self.expr = expr
+        if type(expr) == Data:
+            self.symbols = [expr.symbol]
+        else:
+            self.symbols = symbols
+
+    def get_sympy_expr(self):
+        return sin(self.expression)
