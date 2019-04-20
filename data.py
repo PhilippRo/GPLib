@@ -60,7 +60,7 @@ class Expression:
         ExpressionDiv(self, rhs)
 
     def __pow__(self, rhs):
-        ExpressionPow(self, rhs):
+        ExpressionPow(self, rhs)
 
 
 
