@@ -7,7 +7,7 @@ class Data:
         self.data = data
         self.uncert_stat = uncert_stat
         self.uncert_sys = uncert_sys
-        if len(self.symbol.split(" ")) == 1:
+        if len(symbol.split(" ")) == 1:
             self.symbol = symbols(symbol)
         else:
             raise ValueError("Symbol string may not contain spaces")
