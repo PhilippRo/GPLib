@@ -18,22 +18,27 @@ class Data:
     def __add__(self, lhs):
         expr = ExpressionAdd(self, lhs)
         expr.add_symbol(self.symbol)
+        return expr
 
     def __sub__(self, lhs):
         expr = ExpressionSub(self, lhs)
         expr.add_symbol(self.symbol)
+        return expr
 
     def __mul__(self, lhs):
         expr = ExpressionMul(self, lhs)
         expr.add_symbol(self.symbol)
+        return expr
 
     def __div___(self, lhs):
         expr = ExpressionDiv(self, lhs)
         expr.add_symbol(self.symbol)
+        return expr
 
     def __pow__(self, lhs):
         expr = ExpressionPow(self, lhs)
         expr.add_symbol(self.symbol)
+        return expr
 
 
 
@@ -44,23 +49,23 @@ class Expression:
             self.symbols.append(sym)
 
     def unite_symbols(self, rhs):
-        self.symbols = lhs.append(
-            [x for x in lhs.symbols if x not in rhs.symbols])
+        self.symbols = self.symbols.append(
+            [x for x in self.symbols if x not in rhs.symbols])
 
     def __add__(self, rhs):
-        ExpressionAdd(self, rhs)
+        return ExpressionAdd(self, rhs)
 
     def __mul__(self, rhs):
-        ExpressionSub(self, rhs)
+        return ExpressionSub(self, rhs)
 
     def __sub__(self, ths):
-        ExpressionSub(self, ths)
+        return ExpressionSub(self, ths)
 
     def __truediv__(self, rhs):
-        ExpressionDiv(self, rhs)
+        return ExpressionDiv(self, rhs)
 
     def __pow__(self, rhs):
-        ExpressionPow(self, rhs)
+        return ExpressionPow(self, rhs)
 
 
 
@@ -69,7 +74,8 @@ class ExpressionAdd(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols()
+        self.unite_symbols( lhs )
+        self.unite_symbols( rhs )
 
     def get_sympy_expr(self):
         return self.lhs.get_sympy_expr + self.rhs.get_sympy_expr
@@ -81,7 +87,8 @@ class ExpressionSub(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols()
+        self.unite_symbols( lhs )
+        self.unite_symbols( rhs )
 
     def get_sympy_expr(self):
         return self.lhs.get_sympy_expr - self.rhs.get_sympy_expr
@@ -93,7 +100,8 @@ class ExpressionMul(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols()
+        self.unite_symbols( lhs )
+        self.unite_symbols( rhs )
 
     def get_sympy_expr(self):
         return self.lhs.get_sympy_expr * self.rhs.get_sympy_expr
@@ -104,7 +112,8 @@ class ExpressionDiv(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols()
+        self.unite_symbols( lhs )
+        self.unite_symbols( rhs )
 
     def get_sympy_expr(self):
         return self.lhs.get_sympy_expr / self.rhs.get_sympy_expr
@@ -115,7 +124,8 @@ class ExpressionPow(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols()
+        self.unite_symbols( lhs )
+        self.unite_symbols( rhs )
 
     def get_sympy_expr(self):
         return self.lhs.get_sympy_expr ** self.rhs.get_sympy_expr
