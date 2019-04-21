@@ -9,35 +9,36 @@ class Data:
         self.uncert_sys = uncert_sys
         if len(symbol.split(" ")) == 1:
             self.symbol = symbols(symbol)
+            self.symbols = [ self.symbol ]
         else:
             raise ValueError("Symbol string may not contain spaces")
 
-    def get_sympy_expr():
+    def get_sympy_expr(self):
         return self.symbol
 
     def __add__(self, lhs):
         expr = ExpressionAdd(self, lhs)
-        expr.add_symbol(self.symbol)
+        #expr.add_symbol(self.symbol)
         return expr
 
     def __sub__(self, lhs):
         expr = ExpressionSub(self, lhs)
-        expr.add_symbol(self.symbol)
+        #expr.add_symbol(self.symbol)
         return expr
 
     def __mul__(self, lhs):
         expr = ExpressionMul(self, lhs)
-        expr.add_symbol(self.symbol)
+        #expr.add_symbol(self.symbol)
         return expr
 
     def __div___(self, lhs):
         expr = ExpressionDiv(self, lhs)
-        expr.add_symbol(self.symbol)
+        #expr.add_symbol(self.symbol)
         return expr
 
     def __pow__(self, lhs):
         expr = ExpressionPow(self, lhs)
-        expr.add_symbol(self.symbol)
+        #expr.add_symbol(self.symbol)
         return expr
 
 
@@ -48,9 +49,9 @@ class Expression:
         if sym not in self.symbols:
             self.symbols.append(sym)
 
-    def unite_symbols(self, rhs):
-        self.symbols = self.symbols.append(
-            [x for x in self.symbols if x not in rhs.symbols])
+    def unite_symbols(self, lhs, rhs):
+        self.symbols = lhs.symbols.append(
+            [x for x in lhs.symbols if x not in rhs.symbols])
 
     def __add__(self, rhs):
         return ExpressionAdd(self, rhs)
@@ -74,11 +75,10 @@ class ExpressionAdd(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols( lhs )
-        self.unite_symbols( rhs )
+        self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr + self.rhs.get_sympy_expr
+        return self.lhs.get_sympy_expr() + self.rhs.get_sympy_expr()
 
 
 
@@ -87,11 +87,10 @@ class ExpressionSub(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols( lhs )
-        self.unite_symbols( rhs )
+        self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr - self.rhs.get_sympy_expr
+        return self.lhs.get_sympy_expr() - self.rhs.get_sympy_expr()
 
 
 
@@ -100,11 +99,10 @@ class ExpressionMul(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols( lhs )
-        self.unite_symbols( rhs )
+        self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr * self.rhs.get_sympy_expr
+        return self.lhs.get_sympy_expr() * self.rhs.get_sympy_expr()
 
 
 class ExpressionDiv(Expression):
@@ -112,11 +110,10 @@ class ExpressionDiv(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols( lhs )
-        self.unite_symbols( rhs )
+        self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr / self.rhs.get_sympy_expr
+        return self.lhs.get_sympy_expr() / self.rhs.get_sympy_expr()
 
 
 class ExpressionPow(Expression):
@@ -124,11 +121,10 @@ class ExpressionPow(Expression):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
-        self.unite_symbols( lhs )
-        self.unite_symbols( rhs )
+        self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr ** self.rhs.get_sympy_expr
+        return self.lhs.get_sympy_expr() ** self.rhs.get_sympy_expr()
 
 def GPLog(arg):
     return ExpressionLog(arg)
@@ -158,4 +154,4 @@ class ExpressionSin(Expression):
             self.symbols = symbols
 
     def get_sympy_expr(self):
-        return sin(self.expression)
+        return sin(self.expr.get_sympy_expr())
