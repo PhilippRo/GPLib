@@ -160,10 +160,7 @@ class ExpressionLog(Expression):
 
     def __init__(self, expr):
         self.expr = expr
-        if type(expr) == Data:
-            self.symbols = [expr.symbol]
-        else:
-            self.symbols = expr.symbols
+        self.symbols = expr.symbols
 
     def get_sympy_expr(self):
         return log(self.expr.get_sympy_expr())
@@ -175,10 +172,7 @@ class ExpressionSin(Expression):
 
     def __init__(self, expr):
         self.expr = expr
-        if type(expr) == Data:
-            self.symbols = [expr.symbol]
-        else:
-            self.symbols = expr.symbols
+        self.symbols = expr.symbols
 
     def get_sympy_expr(self):
         return sin(self.expr.get_sympy_expr())
