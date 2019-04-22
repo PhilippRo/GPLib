@@ -69,7 +69,8 @@ class Expression:
     def __pow__(self, rhs):
         return ExpressionPow(self, rhs)
 
-
+    def consume(self, tex_file = None):
+        pass
 
 class ExpressionAdd(Expression):
 
