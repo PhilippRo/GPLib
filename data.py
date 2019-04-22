@@ -50,8 +50,9 @@ class Expression:
             self.symbols.append(sym)
 
     def unite_symbols(self, lhs, rhs):
-        self.symbols = lhs.symbols.append(
-            [x for x in lhs.symbols if x not in rhs.symbols])
+        self.symbols = lhs.symbols.copy()
+        self.symbols.extend(
+            [x for x in rhs.symbols if x not in lhs.symbols])
 
     def __add__(self, rhs):
         return ExpressionAdd(self, rhs)
@@ -136,7 +137,7 @@ class ExpressionLog(Expression):
         if type(expr) == Data:
             self.symbols = [expr.symbol]
         else:
-            self.symbols = symbols
+            self.symbols = expr.symbols
 
     def get_sympy_expr(self):
         return log(self.expr.get_sympy_expr())
@@ -151,7 +152,7 @@ class ExpressionSin(Expression):
         if type(expr) == Data:
             self.symbols = [expr.symbol]
         else:
-            self.symbols = symbols
+            self.symbols = expr.symbols
 
     def get_sympy_expr(self):
         return sin(self.expr.get_sympy_expr())
