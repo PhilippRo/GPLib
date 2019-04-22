@@ -1,8 +1,69 @@
 
 from util import quad_add
-
+from tex import TexFile
 from sympy import *
+import matplotlib.pyplot as plt
 import numpy as np
+
+from praktikum.analyse import lineare_regression, lineare_regression_xy
+
+tex_file = TexFile("tex_file.tex")
+
+class LinRegResult:
+
+    def __init__(self, xs, ys, x_err_stat, y_err_stat,
+            x_err_sys, y_err_sys, chi_q, m, m_err_stat,
+            m_err_sys, c, c_err_stat, c_err_sys):
+        self.xs = xs
+        self.ys = ys
+        self.x_err_stat = x_err_stat
+        self.x_err_sys = x_err_sys
+        self.y_err_stat = y_err_stat
+        self.y_err_sys = y_err_sys
+        self.chi_q = chi_q
+        self.m = m
+        self.m_err_sys = m_err_sys
+        self.m_err_stat = m_err_stat
+        self.c = c
+        self.c_err_sys = c_err_sys
+        self.c_err_stat = c_err_stat
+
+
+    def save_to_file(self, filen, xname, yname, font_size, tex_file = None):
+        plt.rcParams.update({'font.size': font_size})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
+
+        fig = plt.figure(figsize=(20,16))
+        grid = plt.GridSpec(8,8)
+
+        res_plot = fig.add_subplot(grid[-2:, :])
+        data_plot = fig.add_subplot(grid[-3:, :], sharex = res_plot)
+
+        data_plot.plot(self.xs, self.m * self.xs + self.c, label=r'Fit', color='g', marker='o')
+        data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
+                ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
+
+
+        res_plot.plot(self.xs, np.zeros(len(self.xs)))
+        res_plot.errorbar(self.xs, self.ys - self.m * self.xs + self.c, ecolor="r",
+            yerr = self.y_err_stat + self.m * self.x_err_stat,
+            capsize=3, elinewidth=1, label = r"Residualgraph $f(x) - y$",
+                fmt='', linewidth=0)
+
+        data_plot.legend()
+        res_plot.legend()
+        plt.xlabel(xname)
+        plt.ylabel(yname)
+
+        plt.savefig(filen + '.eps')
+
+        if tex_file is not None:
+            tex_file.write_table({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
+                'Wert': [self.m, self.c, self.chi_q],
+                'Stat. Fehler': [self.m_err_stat, self.c_err_stat, "-"],
+                'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]})
+
 
 class Data:
 
@@ -46,6 +107,10 @@ class Data:
 
 class Expression:
 
+    def __init__(self, data):
+        self.data = data
+        self.symbols = [data]
+
     def add_symbol(self, sym):
         if sym not in self.symbols:
             self.symbols.append(sym)
@@ -69,6 +134,28 @@ class Expression:
 
     def __pow__(self, rhs):
         return ExpressionPow(self, rhs)
+
+    #lineare regression
+    def __lt__(self, rhs):
+        xs = self.consume("xs", tex_file)
+        ys = rhs.consume("ys", tex_file)
+        if (xs.uncert_stat == np.zeros(len(xs.uncert_stat))).all():
+            m, m_stat, c, c_stat, chi_q, _ = linerare_regression(xs.data, ys.data, ys.uncert_stat)
+            m1, _, c1, _, _, _ = lineare_regression(xs.data, ys.data + ys.uncert_sys, ys.uncert_stat)
+            m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
+            return LinRegResult(xs.data, ys.data, xs.uncert_stat,
+                ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
+                chi_q, m, m_stat, np.abs(m2 -m1) * 0.5, c, c_stat, np.abs(c2 - c1)*0.5)
+        else:
+            m, m_stat, c, c_stat, chi_q, _ = lineare_regression_xy(xs.data, ys.data, xs.uncert_stat, ys.uncert_stat)
+            m1, _, c1, _, _, _ = lineare_regression_xy(xs.data + xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
+            m2, _, c2, _, _, _ = lineare_regression_xy(xs.data - xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
+            m3, _, c3, _, _, _ = lineare_regression_xy(xs.data, ys.data + ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
+            m4, _, c4, _, _, _ = lineare_regression_xy(xs.data, ys.data - ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
+            return LinRegResult(xs.data, ys.data, xs.uncert_stat,
+                ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
+                chi_q, m, m_stat, quad_add([np.abs(m2 -m1), np.abs(m4-m3)]) * 0.5,
+                c, c_stat, quad_add([np.abs(c2 - c1), np.abs(c4-c3)])*0.5)
 
     def consume(self, name , tex_file = None):
         expr = self.get_sympy_expr()
@@ -95,6 +182,8 @@ class Expression:
                 caption = "Fehler fortpflanzung auf ${}$".format(latex(expr)))
         return Data(name, ndata, quad_add(prop_stat_err), quad_add(prop_sys_err))
 
+    def get_sympy_expr(self):
+        return self.data.get_sympy_expr()
 
 
 class ExpressionAdd(Expression):

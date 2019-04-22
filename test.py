@@ -25,5 +25,14 @@ class DataTestCase(unittest.TestCase):
         res = ExpressionSin(x).consume("res")
         self.assertTrue(np.array_equal(res.data , np.sin(d)))
 
+    def test_lin_reg(self):
+        x = Data("x", np.array([1, 2, 3, 4, 5]),
+            np.array([0.1, 0.12, 0.11, 0.1, 0.1]),
+            np.array([0.1, 0.12, 0.11, 0.1, 0.1]))
+        y = Data("y", np.array([1, 2, 3, 4, 5]),
+            np.array([0.1, 0.12, 0.11, 0.1, 0.1]),
+            np.array([0.1, 0.12, 0.11, 0.1, 0.1]))
+        lr = Expression(x) < Expression(y)
+        lr.save_to_file("test", "x", "y", 20, tex_file )
 
 unittest.main()
