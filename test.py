@@ -17,5 +17,13 @@ class DataTestCase(unittest.TestCase):
         res = (x + y*y).consume("res", tex_file)
         self.assertTrue(np.array_equal(res.data , d + d ** 2))
 
+    def test_sin(self):
+        d = np.array([np.pi, np.pi/2])
+        x = Data("x", np.array([np.pi, np.pi/2]),
+            np.array([0.1, 0.12]),
+            np.array([0.1, 0.12]))
+        res = ExpressionSin(x).consume("res")
+        self.assertTrue(np.array_equal(res.data , np.sin(d)))
+
 
 unittest.main()
