@@ -38,7 +38,7 @@ class LinRegResult:
         grid = plt.GridSpec(8,8)
 
         res_plot = fig.add_subplot(grid[-2:, :])
-        data_plot = fig.add_subplot(grid[-3:, :], sharex = res_plot)
+        data_plot = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
 
         data_plot.plot(self.xs, self.m * self.xs + self.c, label=r'Fit', color='g', marker='o')
         data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
