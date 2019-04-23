@@ -145,7 +145,7 @@ class Expression:
             m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
             return LinRegResult(xs.data, ys.data, xs.uncert_stat,
                 ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
-                chi_q, m, m_stat, np.abs(m2 -m1) * 0.5, c, c_stat, np.abs(c2 - c1)*0.5)
+                chi_q, m, m_stat, (np.abs(m2 - m) + np.abs(m - m1)) * 0.5, c, c_stat, (np.abs(c2 - c) + np.abs(c - c1))*0.5)
         else:
             m, m_stat, c, c_stat, chi_q, _ = lineare_regression_xy(xs.data, ys.data, xs.uncert_stat, ys.uncert_stat)
             m1, _, c1, _, _, _ = lineare_regression_xy(xs.data + xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
@@ -154,29 +154,23 @@ class Expression:
             m4, _, c4, _, _, _ = lineare_regression_xy(xs.data, ys.data - ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
             return LinRegResult(xs.data, ys.data, xs.uncert_stat,
                 ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
-                chi_q, m, m_stat, quad_add([np.abs(m2 -m1), np.abs(m4-m3)]) * 0.5,
-                c, c_stat, quad_add([np.abs(c2 - c1), np.abs(c4-c3)])*0.5)
+                chi_q, m, m_stat, quad_add([np.abs(m2 - m) + np.abs(m - m1), np.abs(m4 -m) + np.abs(m - m3)]) * 0.5,
+                c, c_stat, quad_add([np.abs(c2 - c) + np.abs(c - c1), np.abs(c4 - c) + np.abs(c - c3)])*0.5)
 
     def consume(self, name , tex_file = None):
         expr = self.get_sympy_expr()
         symbols = [x.symbol for x in self.symbols]
-        stat_err_expr =  [diff(expr, x.symbol) for x in self.symbols]
-        prop_stat_err = [lambdify(symbols, expr)(*[x.data for x in self.symbols])
-            for  expr in stat_err_expr]
-        prop_stat_err = [a * b for (a,b) in zip(prop_stat_err, [x.uncert_stat for x in self.symbols])]
+        err_expr =  [diff(expr, x.symbol) for x in self.symbols]
+        prop_err = [lambdify(symbols, expr)(*[x.data for x in self.symbols])
+            for  expr in err_expr]
+        prop_stat_err = [a * b for (a,b) in zip(prop_err, [x.uncert_stat for x in self.symbols])]
+        prop_sys_err = [a * b for (a,b) in zip(prop_err, [x.uncert_sys for x in self.symbols])]
 
         lambda_expr = lambdify(symbols, expr)
         ndata = lambda_expr(*[x.data for x in self.symbols])
-        prop_sys_err = [
-            0.5 * np.abs(
-                lambda_expr(*[self.symbols[m].data if m != i else
-                    self.symbols[m].data - self.symbols[m].uncert_sys for m in range(len(self.symbols))]) -
-                lambda_expr(*[self.symbols[m].data if m != i else
-                    self.symbols[m].data + self.symbols[m].uncert_sys for m in range(len(self.symbols))])
-            ) for i in range(len(self.symbols))]
         if tex_file is not None:
             tex_file.write_table({"Paramter": [latex(sym) for sym in symbols],
-                "Fortpflanzungsterm": [latex(expr) for expr in stat_err_expr],
+                "Fortpflanzungsterm": [latex(expr) for expr in err_expr],
                 "Durchschnittlicher stat. Fehler": [ np.average(stat) for stat in prop_stat_err],
                 "Druchschnittlicher sys. Fehler": [np.average(sys) for sys in prop_sys_err]},
                 caption = "Fehler fortpflanzung auf ${}$".format(latex(expr)))
