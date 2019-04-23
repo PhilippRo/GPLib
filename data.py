@@ -140,7 +140,7 @@ class Expression:
         xs = self.consume("xs", tex_file)
         ys = rhs.consume("ys", tex_file)
         if (xs.uncert_stat == np.zeros(len(xs.uncert_stat))).all():
-            m, m_stat, c, c_stat, chi_q, _ = linerare_regression(xs.data, ys.data, ys.uncert_stat)
+            m, m_stat, c, c_stat, chi_q, _ = lineare_regression(xs.data, ys.data, ys.uncert_stat)
             m1, _, c1, _, _, _ = lineare_regression(xs.data, ys.data + ys.uncert_sys, ys.uncert_stat)
             m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
             return LinRegResult(xs.data, ys.data, xs.uncert_stat,
