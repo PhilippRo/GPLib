@@ -4,6 +4,7 @@ from tex import TexFile
 from sympy import *
 import matplotlib.pyplot as plt
 import numpy as np
+import numbers
 
 from praktikum.analyse import lineare_regression, lineare_regression_xy
 
@@ -68,6 +69,11 @@ class LinRegResult:
 class Data:
 
     def __init__(self, symbol ,data, uncert_stat, uncert_sys):
+        if isinstance( data, np.ndarray ) :
+            if (not data.shape == uncert_stat.shape) or (not data.shape == uncert_sys.shape) :
+                raise ValueError("data, uncert_stat and uncert_sys must be of equal shape")
+        elif (not isinstance( data, numbers.Number )) or (not isinstance( uncert_stat, numbers.Number )) or (not isinstance( uncert_sys, numbers.Number )) :
+            raise ValueError("data, uncert_stat and uncert_sys must be Number or np.array")
         self.data = data
         self.uncert_stat = uncert_stat
         self.uncert_sys = uncert_sys
