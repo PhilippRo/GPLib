@@ -68,8 +68,12 @@ class LinRegResult:
 
 class Data:
 
-    def __init__(self, symbol ,data, uncert_stat, uncert_sys):
+    def __init__(self, symbol ,data, uncert_stat=0, uncert_sys=0):
         if isinstance( data, np.ndarray ) :
+            if isinstance( uncert_stat, numbers.Number ) and uncert_stat == 0 :
+                uncert_stat = np.zeros(len(data))
+            if isinstance( uncert_sys, numbers.Number ) and uncert_sys == 0 :
+                uncert_sys = np.zeros(len(data))
             if (not data.shape == uncert_stat.shape) or (not data.shape == uncert_sys.shape) :
                 raise ValueError("data, uncert_stat and uncert_sys must be of equal shape")
         elif (not isinstance( data, numbers.Number )) or (not isinstance( uncert_stat, numbers.Number )) or (not isinstance( uncert_sys, numbers.Number )) :
@@ -180,7 +184,7 @@ class Expression:
                 "Durchschnittlicher stat. Fehler": [ np.average(stat) for stat in prop_stat_err],
                 "Druchschnittlicher sys. Fehler": [np.average(sys) for sys in prop_sys_err]},
                 caption = "Fehler fortpflanzung auf ${}$".format(latex(expr)))
-        return Data(name, ndata, quad_add(prop_stat_err), quad_add(prop_sys_err))
+        return Data(name, ndata, uncert_stat=quad_add(prop_stat_err), uncert_sys=quad_add(prop_sys_err))
 
     def get_sympy_expr(self):
         return self.data.get_sympy_expr()
