@@ -17,6 +17,9 @@ class DataTestCase(unittest.TestCase):
         res = (x + y*y).consume("res", tex_file)
         self.assertTrue(np.array_equal(res.data , d + d ** 2))
 
+        with self.assertRaises(ValueError) :
+            res + x
+
     def test_sin(self):
         d = np.array([np.pi, np.pi/2])
         x = Data("x", np.array([np.pi, np.pi/2]),
@@ -39,7 +42,7 @@ class DataTestCase(unittest.TestCase):
         d = np.array([0,np.pi/2, np.pi])
         x = Data("x", d,
             uncert_stat = np.array([0.1,0.2,0.1]),
-            uncert_sys = np.array([0.2,0.4,0.2]))
+            uncert_sys = np.array([0.2,0.4,0.4]))
         d2 = np.array([1,2,2])
         c = Data("c", d2,
             uncert_stat = np.array([0,0,0]),
@@ -49,13 +52,13 @@ class DataTestCase(unittest.TestCase):
         uncert_stat_equal = True
         uncert_sys_equal = True
         for i in range(len(res.data)) :
-            if abs( res.data[i] - d2 * np.sin( d ) ) < 0.00001:
+            if np.abs( res.data - d2 * np.sin( d ) )[i] > 0.00001:
                 data_equal = False
                 break
-            if abs( res.uncert_stat[i] - np.asarray( [0.1,0,0.2] ) * d2 * np.cos(d) ) < 0.00001:
+            if np.abs( res.uncert_stat - np.abs(np.asarray( [0.1,0.2,0.1] ) * d2 * np.cos(d)) )[i] > 0.00001:
                 uncert_stat_equal = False
                 break
-            if abs( res.uncert_sys[i] - np.asarray( [0.2,0,0.4] ) * d2 * np.cos(d) ) < 0.00001:
+            if np.abs( res.uncert_sys- np.abs(np.asarray( [0.2,0,0.4] ) * d2 * np.cos(d)) )[i] > 0.00001:
                 uncert_sys_equal = False
                 break
         self.assertTrue( data_equal )

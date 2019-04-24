@@ -68,7 +68,7 @@ class LinRegResult:
 
 class Data:
 
-    def __init__(self, symbol ,data, uncert_stat=0, uncert_sys=0):
+    def __init__(self, symbol ,data, uncert_stat=0, uncert_sys=0, blacklist = []):
         if isinstance( data, np.ndarray ) :
             if isinstance( uncert_stat, numbers.Number ) and uncert_stat == 0 :
                 uncert_stat = np.zeros(len(data))
@@ -81,6 +81,7 @@ class Data:
         self.data = data
         self.uncert_stat = uncert_stat
         self.uncert_sys = uncert_sys
+        self.blacklist = blacklist
         if len(symbol.split(" ")) == 1:
             self.symbol = symbols(symbol)
             self.symbols = [self]
@@ -120,15 +121,29 @@ class Expression:
     def __init__(self, data):
         self.data = data
         self.symbols = [data]
+        self.blacklist = data.blacklist
 
     def add_symbol(self, sym):
         if sym not in self.symbols:
+            if sym in self.blacklist :
+                raise ValueError("symbol in blacklist!")
+
             self.symbols.append(sym)
+
+    def unite_blacklist(self, lhs, rhs):
+        self.blacklist = lhs.blacklist.copy()
+        self.blacklist.extend(
+            [x for x in rhs.blacklist if x not in lhs.blacklist])
 
     def unite_symbols(self, lhs, rhs):
         self.symbols = lhs.symbols.copy()
         self.symbols.extend(
             [x for x in rhs.symbols if x not in lhs.symbols])
+
+        self.unite_blacklist(lhs, rhs)
+        for s in self.symbols:
+            if s in self.blacklist :
+                raise ValueError("One or more symbols in blacklist!")
 
     def __add__(self, rhs):
         return ExpressionAdd(self, rhs)
@@ -184,7 +199,7 @@ class Expression:
                 "Durchschnittlicher stat. Fehler": [ np.average(stat) for stat in prop_stat_err],
                 "Druchschnittlicher sys. Fehler": [np.average(sys) for sys in prop_sys_err]},
                 caption = "Fehler fortpflanzung auf ${}$".format(latex(expr)))
-        return Data(name, ndata, uncert_stat=quad_add(prop_stat_err), uncert_sys=quad_add(prop_sys_err))
+        return Data(name, ndata, uncert_stat=quad_add(prop_stat_err), uncert_sys=quad_add(prop_sys_err), blacklist=self.symbols.copy() )
 
     def get_sympy_expr(self):
         return self.data.get_sympy_expr()
@@ -253,6 +268,7 @@ class ExpressionLog(Expression):
 
     def __init__(self, expr):
         self.expr = expr
+        self.blacklist = expr.blacklist
         self.symbols = expr.symbols
 
     def get_sympy_expr(self):
@@ -265,6 +281,7 @@ class ExpressionSin(Expression):
 
     def __init__(self, expr):
         self.expr = expr
+        self.blacklist = expr.blacklist
         self.symbols = expr.symbols
 
     def get_sympy_expr(self):
