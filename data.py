@@ -43,7 +43,7 @@ class LinRegResult:
 
         data_plot.plot(self.xs, self.m * self.xs + self.c, label=r'Fit', color='g', marker='', linewidth=4)
         data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
-                ecolor='r', capsize =  2, elinewidth=2, linewidth=4, label=r"Daten")
+                ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
 
 
         res_plot.plot(self.xs, np.zeros(len(self.xs)))
