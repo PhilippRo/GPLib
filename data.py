@@ -50,7 +50,7 @@ class LinRegResult:
         res_plot.errorbar(self.xs, self.ys - self.m * self.xs - self.c, ecolor="r",
             yerr = self.y_err_stat + self.m * self.x_err_stat,
             capsize=3, elinewidth=1, label = r"Residualgraph $f(x) - y$",
-                fmt='', linewidth=4)
+                fmt='', linewidth=0)
 
         data_plot.legend()
         res_plot.legend()
