@@ -21,7 +21,7 @@ class LinRegResult:
         self.x_err_sys = x_err_sys
         self.y_err_stat = y_err_stat
         self.y_err_sys = y_err_sys
-        self.chi_q = chi_q
+        self.chi_q = chi_q / len(xs)
         self.m = m
         self.m_err_sys = m_err_sys
         self.m_err_stat = m_err_stat
