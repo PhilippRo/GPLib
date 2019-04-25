@@ -30,7 +30,8 @@ class LinRegResult:
         self.c_err_stat = c_err_stat
 
 
-    def save_to_file(self, filen, xname, yname, font_size, tex_file = None):
+    def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
+            tex_file = None):
         plt.rcParams.update({'font.size': font_size})
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
@@ -52,8 +53,10 @@ class LinRegResult:
             capsize=3, elinewidth=1, label = r"Residualgraph $f(x) - y$",
                 fmt='', linewidth=0)
 
-        data_plot.legend()
-        res_plot.legend()
+        if legend_font_size is not None:
+            legend_font_size = font_size
+        data_plot.legend(fontsize=legend_font_size)
+        res_plot.legend(fontsize=legend_font_size)
         plt.xlabel(xname)
         plt.ylabel(yname)
 
