@@ -57,8 +57,8 @@ class LinRegResult:
             legend_font_size = font_size
         data_plot.legend(fontsize=legend_font_size)
         res_plot.legend(fontsize=legend_font_size)
-        plt.xlabel(xname)
-        plt.ylabel(yname)
+        plt.xlabel(xname, fontsize=font_size)
+        plt.ylabel(yname, fontsize=font_size)
 
         plt.savefig(filen + '.eps')
 
