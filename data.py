@@ -14,7 +14,8 @@ class LinRegResult:
 
     def __init__(self, xs, ys, x_err_stat, y_err_stat,
             x_err_sys, y_err_sys, chi_q, m, m_err_stat,
-            m_err_sys, c, c_err_stat, c_err_sys):
+            m_err_sys, c, c_err_stat, c_err_sys,
+            blacklist ):
         self.xs = xs
         self.ys = ys
         self.x_err_stat = x_err_stat
@@ -28,7 +29,21 @@ class LinRegResult:
         self.c = c
         self.c_err_sys = c_err_sys
         self.c_err_stat = c_err_stat
+        self.blacklist = blacklist
 
+    def slope(self, symbol) :
+        return Data(symbol, self.m, uncert_stat=self.m_err_stat, uncert_sys=self.m_err_sys, blacklist=self.blacklist)
+
+    def axis_intercept(self, symbol) :
+        return Data(symbol, self.c, uncert_stat=self.c_err_stat, uncert_sys=self.c_err_sys, blacklist=self.blacklist)
+
+    def model(self, y_symbol, x) :
+        m = Data('m_intern', self.m)
+        c = Data('c_intern', self.c)
+        res = ( m*x + c ).consume(y_symbol)
+        res.blacklist.remove(m)
+        res.blacklist.remove(c)
+        return res
 
     def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
             tex_file = None):
@@ -173,7 +188,10 @@ class Expression:
             m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
             return LinRegResult(xs.data, ys.data, xs.uncert_stat,
                 ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
-                chi_q, m, m_stat, (np.abs(m2 - m) + np.abs(m - m1)) * 0.5, c, c_stat, (np.abs(c2 - c) + np.abs(c - c1))*0.5)
+                chi_q,
+                m, m_stat, (np.abs(m2 - m) + np.abs(m - m1)) * 0.5,
+                c, c_stat, (np.abs(c2 - c) + np.abs(c - c1)) * 0.5,
+                blacklist=xs.blacklist + ys.blacklist )
         else:
             m, m_stat, c, c_stat, chi_q, _ = lineare_regression_xy(xs.data, ys.data, xs.uncert_stat, ys.uncert_stat)
             m1, _, c1, _, _, _ = lineare_regression_xy(xs.data + xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
@@ -182,8 +200,10 @@ class Expression:
             m4, _, c4, _, _, _ = lineare_regression_xy(xs.data, ys.data - ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
             return LinRegResult(xs.data, ys.data, xs.uncert_stat,
                 ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
-                chi_q, m, m_stat, quad_add([np.abs(m2 - m) + np.abs(m - m1), np.abs(m4 -m) + np.abs(m - m3)]) * 0.5,
-                c, c_stat, quad_add([np.abs(c2 - c) + np.abs(c - c1), np.abs(c4 - c) + np.abs(c - c3)])*0.5)
+                chi_q,
+                m, m_stat, quad_add([np.abs(m2 - m) + np.abs(m - m1), np.abs(m4 - m) + np.abs(m - m3)]) * 0.5,
+                c, c_stat, quad_add([np.abs(c2 - c) + np.abs(c - c1), np.abs(c4 - c) + np.abs(c - c3)]) * 0.5,
+                blacklist=xs.blacklist + ys.blacklist )
 
     def consume(self, name , tex_file = None):
         expr = self.get_sympy_expr()

@@ -36,6 +36,9 @@ class DataTestCase(unittest.TestCase):
             uncert_stat = np.array([0.1, 0.12, 0.11, 0.1, 0.1]),
             uncert_sys = np.array([0.1, 0.12, 0.11, 0.1, 0.1]))
         lr = Expression(x) < Expression(y)
+        m = lr.slope('m')
+        c = lr.axis_intercept('c')
+        y_m = lr.model('y_m', x)
         lr.save_to_file("test", "x", "y", 20, tex_file )
 
     def test_error_prop(self):
