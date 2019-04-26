@@ -1,7 +1,10 @@
 from data import *
+from fitting import *
 from tex import *
 import unittest
 import numpy as np
+import sympy
+
 
 class DataTestCase(unittest.TestCase):
 
@@ -67,5 +70,17 @@ class DataTestCase(unittest.TestCase):
         self.assertTrue( data_equal )
         self.assertTrue( uncert_stat_equal )
         self.assertTrue( uncert_sys_equal )
+
+    def test_curve_fit( self ):
+        x_d = np.asarray([-1,1,2,3])
+        y_d = np.asarray([2.2,1.9,5,12])
+
+        x = Data("x", x_d)
+        y = Data("y", y_d, uncert_stat=np.asarray([0.5,0.2,0.2, 0.2]), uncert_sys=np.asarray([0.5,0.5,1,3]))
+
+        p1, p2, p3 = sympy.symbols("p1 p2 p3")
+        f = p1* x.symbol**2 + p2*x.symbol + p3
+
+        curve_fit_result = curve_fit( x, y, (f, (x.symbol, p1, p2, p3)) )
 
 unittest.main()
