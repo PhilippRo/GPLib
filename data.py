@@ -217,11 +217,11 @@ class Expression:
         lambda_expr = lambdify(symbols, expr)
         ndata = lambda_expr(*[x.data for x in self.symbols])
         if tex_file is not None:
-            tex_file.write_table({"Paramter": [latex(sym) for sym in symbols],
+            tex_file.write_table({"Parameter": [latex(sym) for sym in symbols],
                 "Fortpflanzungsterm": [latex(expr) for expr in err_expr],
                 "Durchschnittlicher stat. Fehler": [ np.average(stat) for stat in prop_stat_err],
                 "Druchschnittlicher sys. Fehler": [np.average(sys) for sys in prop_sys_err]},
-                caption = "Fehler fortpflanzung auf ${}$".format(latex(expr)))
+                caption = "Fehlerfortpflanzung auf ${}$".format(latex(expr)))
         return Data(name, ndata, uncert_stat=quad_add(prop_stat_err), uncert_sys=quad_add(prop_sys_err), blacklist=self.symbols.copy() )
 
     def get_sympy_expr(self):

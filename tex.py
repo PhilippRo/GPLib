@@ -5,6 +5,7 @@ class TexFile:
         self.file = open(file_name, "w")
 
     def write_table_column(self, *args):
+        self.file.write("       ")
         for i in range(len(args) - 1):
             self.file.write("{} & ".format(args[i]))
         self.file.write(" {} \\\\\n".format(args[-1]))
@@ -12,20 +13,20 @@ class TexFile:
     def write_table(self, table_content, ref = None, caption = None):
         # write table header
         self.file.write("\\begin{table}\n")
-        self.file.write("\\centering\n")
+        self.file.write("   \\centering\n")
         if caption is not None:
-            self.file.write("\\caption{{}}\n".format(caption))
+            self.file.write("   \\caption{{}}\n".format(caption))
         if ref is not None:
-            self.file.write("\\label{{}}\n".format(ref))
+            self.file.write("   \\label{{}}\n".format(ref))
 
         #write tabular header and
-        self.file.write("\\begin{tabular}{|")
+        self.file.write("   \\begin{tabular}{|")
         for i in range(len(table_content.keys())):
             self.file.write("c|")
         self.file.write("}\n")
-        self.file.write("\\hline\n")
+        self.file.write("       \\hline\n")
         self.write_table_column(*table_content.keys())
-        self.file.write("\\hline\n")
+        self.file.write("       \\hline\n")
 
         #write table body
         try:
@@ -40,6 +41,6 @@ class TexFile:
             raise InvalidArgument("table_content shall contain only lists of same length")
 
         #close everything
-        self.file.write("\\hline")
-        self.file.write("\\end{tabular}")
-        self.file.write("\\end{table}")
+        self.file.write("       \\hline\n")
+        self.file.write("   \\end{tabular}\n")
+        self.file.write("\\end{table}\n")
