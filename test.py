@@ -42,7 +42,7 @@ class DataTestCase(unittest.TestCase):
         m = lr.slope('m')
         c = lr.axis_intercept('c')
         y_m = lr.model('y_m', x)
-        lr.save_to_file("test", "x", "y", 20, tex_file )
+        lr.save_to_file("test", "x", "y", 20, tex_file = tex_file, legend_font_size = 10)
 
     def test_error_prop(self):
         d = np.array([0,np.pi/2, np.pi])

@@ -68,8 +68,9 @@ class LinRegResult:
             capsize=3, elinewidth=1, label = r"Residualgraph $f(x) - y$",
                 fmt='', linewidth=0)
 
-        if legend_font_size is not None:
+        if legend_font_size is None:
             legend_font_size = font_size
+
         data_plot.legend(fontsize=legend_font_size)
         res_plot.legend(fontsize=legend_font_size)
         plt.xlabel(xname, fontsize=font_size)
