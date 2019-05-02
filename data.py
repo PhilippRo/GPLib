@@ -46,7 +46,7 @@ class LinRegResult:
         return res
 
     def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
-            tex_file = None):
+            tex_file = None, title = None):
         plt.rcParams.update({'font.size': font_size})
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
@@ -73,6 +73,11 @@ class LinRegResult:
 
         data_plot.legend(fontsize=legend_font_size)
         res_plot.legend(fontsize=legend_font_size)
+
+        if title is None:
+            title = "Lineare Regression + Residualplot"
+
+        plt.title(title, fontsize=1.3*font_size)
         plt.xlabel(xname, fontsize=font_size)
         plt.ylabel(yname, fontsize=font_size)
 
