@@ -75,7 +75,7 @@ class LinRegResult:
         plt.xlabel(xname, fontsize=font_size)
         plt.ylabel(yname, fontsize=font_size)
 
-        plt.savefig(filen + '.eps')
+        plt.savefig(filen, bbox_inches = "tight")
 
         if tex_file is not None:
             tex_file.write_table({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
