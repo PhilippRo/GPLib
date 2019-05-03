@@ -23,6 +23,14 @@ class DataTestCase(unittest.TestCase):
         with self.assertRaises(ValueError) :
             res + x
 
+    def test_str(self):
+        x = Data("x", np.array([1, 2]),
+            uncert_sys = np.array([0.2, 0.1]))
+        y = Data("y", 10, 1)
+        self.assertEqual( "y = (10 +- 1 +- 0)", y.__str__() )
+        self.assertEqual( "x = [\n\t(1 +- 0.0 +- 0.2)\n\t(2 +- 0.0 +- 0.1)\n]\n", x.__str__() )
+        self.assertEqual( "x + y = [\n\t(11 +- 1.0 +- 0.2)\n\t(12 +- 1.0 +- 0.1)\n]\n", (x+y).__str__())
+
     def test_sin(self):
         d = np.array([np.pi, np.pi/2])
         x = Data("x", np.array([np.pi, np.pi/2]),

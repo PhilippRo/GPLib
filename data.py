@@ -138,6 +138,19 @@ class Data:
         expr = ExpressionPow(self, lhs)
         return expr
 
+    def __str__(self):
+        if isinstance( self.data, np.ndarray ):
+            out = "{} = [\n".format(self.symbol)
+            data = [self.data, self.uncert_stat, self.uncert_sys]
+            data = list(map( list, zip(*data)))
+            for d in data:
+                out += "\t({} +- {} +- {})\n".format(d[0], d[1], d[2])
+            return out + "]\n"
+        else :
+            out = "{} = ".format(self.symbol)
+            out += "({} +- {} +- {})".format(self.data, self.uncert_stat, self.uncert_sys)
+            return out
+
 
 
 class Expression:
@@ -232,6 +245,9 @@ class Expression:
 
     def get_sympy_expr(self):
         return self.data.get_sympy_expr()
+
+    def __str__(self):
+        return self.get_sympy_expr().__str__() + self.consume( "temp" ).__str__()[4:]
 
 
 class ExpressionAdd(Expression):
