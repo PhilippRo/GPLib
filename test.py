@@ -49,7 +49,8 @@ class DataTestCase(unittest.TestCase):
         lr = Expression(x) < Expression(y)
         m = lr.slope('m')
         c = lr.axis_intercept('c')
-        y_m = lr.model('y_m', x)
+        y_m = lr.y_model('y_m')
+        y_new = lr.model('y_pred', Data('x_neu', 6, 0.5, 0.1))
         lr.save_to_file("test", "x", "y", 20, tex_file = tex_file, legend_font_size = 10)
 
     def test_error_prop(self):
