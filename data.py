@@ -38,8 +38,9 @@ class LinRegResult:
         return Data(symbol, self.c, uncert_stat=self.c_err_stat, uncert_sys=self.c_err_sys, blacklist=self.blacklist)
 
     def model(self, y_symbol, x) :
-        m = Data('m_intern', self.m, self.m_err_stat, self.m_err_sys)
-        c = Data('c_intern', self.c, self.c_err_stat, self.c_err_sys)
+        # TODO fix error propragation!
+        m = Data('m_intern', self.m, uncert_sys=self.m_err_stat)
+        c = Data('c_intern', self.c, uncert_sys=self.c_err_stat)
         res = ( m*x + c ).consume(y_symbol)
         res.blacklist.remove(m)
         res.blacklist.remove(c)

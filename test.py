@@ -1,5 +1,6 @@
 from data import *
 from fitting import *
+from calibration import *
 from tex import *
 import unittest
 import numpy as np
@@ -52,6 +53,18 @@ class DataTestCase(unittest.TestCase):
         y_m = lr.y_model('y_m')
         y_new = lr.model('y_pred', Data('x_neu', 6, 0.5, 0.1))
         lr.save_to_file("test", "x", "y", 20, tex_file = tex_file, legend_font_size = 10)
+
+    def test_calibration(self):
+        x = Data("x", np.array([1.2, 2.3, 3.4, 4.5, 5.5]),
+            uncert_stat = np.array([0.1, 0.12, 0.11, 0.1, 0.1]),
+            uncert_sys = np.array([0.1, 0.12, 0.11, 0.1, 0.1]))
+        x_r = Data("xr", np.array([1, 2, 3, 4, 5]),
+            uncert_stat = np.array([0.1, 0.12, 0.11, 0.1, 0.1]),
+            uncert_sys = np.array([0.1, 0.12, 0.11, 0.1, 0.1]))
+        lr = Calibration( x, x_r )
+        m = lr.slope('m')
+        c = lr.axis_intercept('c')
+        lr.save_to_file("test_cali", "x", "xr", 20, tex_file = tex_file, legend_font_size = 10)
 
     def test_error_prop(self):
         d = np.array([0,np.pi/2, np.pi])
