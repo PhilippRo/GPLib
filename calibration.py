@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import sympy
 from data import Data
@@ -5,6 +7,8 @@ from data import Expression
 
 class Calibration:
     def __init__( self, x_m, x_r ):
+        x_m = copy.deepcopy(x_m)
+        x_r = copy.deepcopy(x_r)
         if isinstance( x_m, Expression ) :
             self.mes = x_m
         else :
@@ -13,16 +17,23 @@ class Calibration:
             self.real = x_r
         else :
             self.real = Expression( x_r )
+
+        if isinstance( self.mes.data, np.ndarray ) :
+            self.mes.uncert_sys = np.zeros(len(self.mes.data))
+        else :
+            self.mes.uncert_sys = 0
+
         self.result = self.mes < self.real
 
     def calibrate( self, x, x_name ) :
-        m = Data('m_intern', self.result.m, uncert_sys=self.result.m_err_stat)
-        c = Data('c_intern', self.result.c, uncert_sys=self.result.c_err_stat)
-        res = ( m*x + c ).consume(x_name)
-        if isinstance( res.data, np.ndarray ) :
-            res.uncert_sys = np.zeros(len(res.data))
+        x = copy.deepcopy(x)
+        if isinstance( x.data, np.ndarray ) :
+            x.uncert_sys = np.zeros(len(x.data))
         else :
-            res.uncert_sys = 0
+            x.uncert_sys = 0
+        m = Data('m_intern', self.result.m, uncert_sys=np.sqrt( self.result.m_err_stat**2 + self.result.m_err_sys ))
+        c = Data('c_intern', self.result.c, uncert_sys=np.sqrt( self.result.c_err_stat**2 + self.result.c_err_sys ))
+        res = ( m*x + c ).consume(x_name)
         res.blacklist.remove(m)
         res.blacklist.remove(c)
         return res
