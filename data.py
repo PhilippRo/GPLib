@@ -348,3 +348,10 @@ class ExpressionSin(Expression):
 
     def get_sympy_expr(self):
         return sin(self.expr.get_sympy_expr())
+
+class ExpressionCos(Expresion):
+
+    def __init__(self, expr):
+        self.expr = expr
+        self.backlist = expr.blacklist
+        self.symbols = expr.symbols
