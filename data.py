@@ -191,7 +191,7 @@ class Expression:
         self.unite_blacklist(lhs, rhs)
         for s in self.symbols:
             if s in self.blacklist :
-                raise ValueError("One or more symbols in blacklist!")
+                raise ValueError("One or more symbols in blacklist: {}".format(s.symbol))
 
     def __add__(self, rhs):
         return ExpressionAdd(self, rhs)
