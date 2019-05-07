@@ -63,7 +63,7 @@ class LinRegResult:
         return self.chi_q / self.ndf()
 
     def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
-            tex_file = None, title = None):
+            tex_file = None, title = None, Description = None):
         plt.rcParams.update({'font.size': font_size})
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
@@ -105,7 +105,7 @@ class LinRegResult:
                 'Wert': [self.m, self.c, self.chi_q],
                 'Stat. Fehler': [self.m_err_stat, self.c_err_stat, "-"],
                 'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]},
-                Description = "Ergebnisse Lineare Regression",
+                Description = Description,
                 caption="Ergebnisse der Linearen Regression")
 
 
