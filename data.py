@@ -100,6 +100,8 @@ class LinRegResult:
 
         plt.savefig(filen+'.eps', bbox_inches = "tight")
 
+        plt.close()
+
         if tex_file is not None:
             tex_file.write_section({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
                 'Wert': [self.m, self.c, self.chi_q],
