@@ -37,7 +37,7 @@ class Calibration:
 
     def axis_intercept(self, symbol) :
         c = self.result.axis_intercept( 'c_intern' )
-        m = self.result.axis_intercept( 'm_intern' )
+        m = self.result.slope( 'm_intern' )
         ret = ( c - m * self.mes_mittel + self.real_mittel).consume( symbol )
         ret.blacklist.remove( c )
         ret.blacklist.remove( m )
