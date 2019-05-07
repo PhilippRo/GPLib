@@ -433,7 +433,7 @@ class ExpressionCos(Expression):
         return cos(self.expr.get_sympy_expr())
 
 def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
-        title = None, Description = None):
+        title = None, Description = None, xlines=None, ylines=None):
     plt.rcParams.update({'font.size': font_size})
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
@@ -459,5 +459,13 @@ def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
     plt.title(title, fontsize=1.3*font_size)
     plt.xlabel(xname, fontsize=font_size)
     plt.ylabel(yname, fontsize=font_size)
+
+    if not xlines is None :
+        for x in xlines :
+            plt.axvline(x)
+
+    if not ylines is None :
+        for y in ylines :
+            plt.axhline(y)
 
     plt.savefig(filen+'.eps', bbox_inches = "tight")
