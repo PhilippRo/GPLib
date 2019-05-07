@@ -353,5 +353,5 @@ class ExpressionCos(Expression):
 
     def __init__(self, expr):
         self.expr = expr
-        self.backlist = expr.blacklist
+        self.blacklist = expr.blacklist
         self.symbols = expr.symbols
