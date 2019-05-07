@@ -192,11 +192,21 @@ class Expression:
             [x for x in rhs.blacklist if x not in lhs.blacklist])
 
     def unite_symbols(self, lhs, rhs):
-        self.symbols = lhs.symbols.copy()
-        self.symbols.extend(
-            [x for x in rhs.symbols if x not in lhs.symbols])
-
-        self.unite_blacklist(lhs, rhs)
+        if isinstance( lhs, Data ) or isinstance( lhs, Expression ) :
+            self.symbols = lhs.symbols.copy()
+            if isinstance( rhs, Data ) or isinstance( rhs, Expression ) :
+                self.symbols.extend(
+                    [x for x in rhs.symbols if x not in lhs.symbols])
+                self.unite_blacklist(lhs, rhs)
+            else :
+                self.blacklist = lhs.blacklist.copy()
+        else :
+            if isinstance( rhs, Data ) or isinstance( rhs, Expression ) :
+                self.symbols = rhs.symbols.copy()
+                self.blacklist = rhs.blacklist.copy()
+            else :
+                self.symbols = []
+                self.blacklist = []
         for s in self.symbols:
             if s in self.blacklist :
                 raise ValueError("One or more symbols in blacklist: {}".format(s.symbol))
@@ -272,58 +282,119 @@ class Expression:
 class ExpressionAdd(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() + self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs + rhs
 
 
 
 class ExpressionSub(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() - self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs - rhs
 
 
 
 class ExpressionMul(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() * self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs * rhs
 
 
 class ExpressionDiv(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() / self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs / rhs
 
 
 class ExpressionPow(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() ** self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs ** rhs
+
 
 def GPLog(arg):
     return ExpressionLog(arg)
