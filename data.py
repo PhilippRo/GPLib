@@ -431,3 +431,33 @@ class ExpressionCos(Expression):
 
     def get_sympy_expr(self):
         return cos(self.expr.get_sympy_expr())
+
+def scatter( x, y, filen, xname, yname, fontsize, legend_font_size = None,
+        title = None, Description = None):
+    plt.rcParams.update({'font.size': font_size})
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+
+    fig = plt.figure(figsize=(20,16))
+    grid = plt.GridSpec(8,8)
+
+    res_plot = fig.add_subplot(grid[-2:, :])
+    data_plot = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
+
+    data_plot.errorbar(x.data, y.data, yerr=y.uncert_stat, xerr=x.uncert_stat,
+            ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
+
+
+    if legend_font_size is None:
+        legend_font_size = font_size
+
+    data_plot.legend(fontsize=legend_font_size)
+
+    if title is None:
+        title = "{} against {}".format( yname, xname)
+
+    plt.title(title, fontsize=1.3*font_size)
+    plt.xlabel(xname, fontsize=font_size)
+    plt.ylabel(yname, fontsize=font_size)
+
+    plt.savefig(filen+'.eps', bbox_inches = "tight")
