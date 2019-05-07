@@ -432,7 +432,7 @@ class ExpressionCos(Expression):
     def get_sympy_expr(self):
         return cos(self.expr.get_sympy_expr())
 
-def scatter( x, y, filen, xname, yname, fontsize, legend_font_size = None,
+def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
         title = None, Description = None):
     plt.rcParams.update({'font.size': font_size})
     plt.rc('text', usetex=True)
