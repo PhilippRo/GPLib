@@ -355,3 +355,6 @@ class ExpressionCos(Expression):
         self.expr = expr
         self.blacklist = expr.blacklist
         self.symbols = expr.symbols
+
+    def get_sympy_expr(self):
+        return cos(self.expr.get_sympy_expr())
