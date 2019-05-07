@@ -105,8 +105,8 @@ class LinRegResult:
                 'Wert': [self.m, self.c, self.chi_q],
                 'Stat. Fehler': [self.m_err_stat, self.c_err_stat, "-"],
                 'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]},
-                Description = Description,
-                caption="Ergebnisse der Linearen Regression")
+                Description = "Ergebnisse Lineare Regression",
+                caption= title if title is not None else filen)
 
 
 class Data:

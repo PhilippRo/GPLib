@@ -20,9 +20,9 @@ class TexFile:
         self.file.write("\\begin{table}\n")
         self.file.write("   \\centering\n")
         if caption is not None:
-            self.file.write("   \\caption{{}}\n".format(caption))
+            self.file.write("   \\caption{" + caption + "}\n")
         if ref is not None:
-            self.file.write("   \\label{{}}\n".format(ref))
+            self.file.write("   \\label{" + format(ref) + "}\n")
 
         #write tabular header and
         self.file.write("   \\begin{tabular}{|")
