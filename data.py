@@ -72,10 +72,10 @@ class LinRegResult:
         grid = plt.GridSpec(8,8)
 
         res_plot = fig.add_subplot(grid[-2:, :])
-        data_plot = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
+        plt = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
 
-        data_plot.plot(self.xs, self.m * self.xs + self.c, label=r'Fit', color='g', marker='', linewidth=4)
-        data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
+        plt.plot(self.xs, self.m * self.xs + self.c, label=r'Fit', color='g', marker='', linewidth=4)
+        plt.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
                 ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
 
 
@@ -88,7 +88,7 @@ class LinRegResult:
         if legend_font_size is None:
             legend_font_size = font_size
 
-        data_plot.legend(fontsize=legend_font_size)
+        plt.legend(fontsize=legend_font_size)
         res_plot.legend(fontsize=legend_font_size)
 
         if title is None:
@@ -433,7 +433,7 @@ class ExpressionCos(Expression):
         return cos(self.expr.get_sympy_expr())
 
 def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
-        title = None, Description = None, xlines=None, ylines=None):
+        title = None, Description = None, xlines=None, ylines=None, connect=False):
     plt.rcParams.update({'font.size': font_size})
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
@@ -441,17 +441,16 @@ def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
     fig = plt.figure(figsize=(20,16))
     grid = plt.GridSpec(8,8)
 
-    res_plot = fig.add_subplot(grid[-2:, :])
-    data_plot = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
-
-    data_plot.errorbar(x.data, y.data, yerr=y.uncert_stat, xerr=x.uncert_stat,
+    plt.errorbar(x.data, y.data, yerr=y.uncert_stat, xerr=x.uncert_stat,
             ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
+    if connect :
+        plt.plot( x.data, y.data, color='r' )
 
 
     if legend_font_size is None:
         legend_font_size = font_size
 
-    data_plot.legend(fontsize=legend_font_size)
+    plt.legend(fontsize=legend_font_size)
 
     if title is None:
         title = "{} against {}".format( yname, xname)
