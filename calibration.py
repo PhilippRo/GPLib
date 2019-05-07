@@ -24,10 +24,6 @@ class Calibration:
         m = Data('m_intern', self.result.m, uncert_sys=self.result.m_err_stat)
         c = Data('c_intern', self.result.c, uncert_sys=self.result.c_err_stat)
         res = ( m*(x-self.mes_mittel) + c + self.real_mittel ).consume(x_name)
-        if isinstance( res.data, np.ndarray ) :
-            res.uncert_sys = np.zeros(len(res.data))
-        else :
-            res.uncert_sys = 0
         res.blacklist.remove(m)
         res.blacklist.remove(c)
         return res
