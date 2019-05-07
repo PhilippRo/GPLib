@@ -10,6 +10,11 @@ class TexFile:
             self.file.write("{} & ".format(args[i]))
         self.file.write(" {} \\\\\n".format(args[-1]))
 
+    def write_empty_line(self, number = 1):
+
+        for i in range(number):
+            self.file.write("\n")
+
     def write_table(self, table_content, ref = None, caption = None):
         # write table header
         self.file.write("\\begin{table}\n")
@@ -44,3 +49,11 @@ class TexFile:
         self.file.write("       \\hline\n")
         self.file.write("   \\end{tabular}\n")
         self.file.write("\\end{table}\n")
+
+    def write_section(self, table_content, ref = None, caption = None, Description = None):
+
+        if Description is not None:
+            self.write_empty_line()
+            self.file.write(Description +"\n")
+            self.write_empty_line(2)
+            self.write_table(table_content, ref = ref, caption = caption)

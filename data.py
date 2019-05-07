@@ -82,7 +82,7 @@ class LinRegResult:
         res_plot.plot(self.xs, np.zeros(len(self.xs)))
         res_plot.errorbar(self.xs, self.ys - self.m * self.xs - self.c, ecolor="r",
             yerr = self.y_err_stat + self.m * self.x_err_stat,
-            capsize=3, elinewidth=1, label = r"Residualgraph $f(x) - y$",
+            capsize=3, elinewidth=1, label = r"Residuengraph $f(x) - y$",
                 fmt='', linewidth=0)
 
         if legend_font_size is None:
@@ -92,7 +92,7 @@ class LinRegResult:
         res_plot.legend(fontsize=legend_font_size)
 
         if title is None:
-            title = "Lineare Regression + Residualplot"
+            title = "Lineare Regression + Residuenplot"
 
         plt.title(title, fontsize=1.3*font_size)
         plt.xlabel(xname, fontsize=font_size)
@@ -101,10 +101,12 @@ class LinRegResult:
         plt.savefig(filen+'.eps', bbox_inches = "tight")
 
         if tex_file is not None:
-            tex_file.write_table({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
+            tex_file.write_section({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
                 'Wert': [self.m, self.c, self.chi_q],
                 'Stat. Fehler': [self.m_err_stat, self.c_err_stat, "-"],
-                'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]})
+                'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]},
+                Description = "Ergebnisse Lineare Regression",
+                caption="Ergebnisse der Linearen Regression")
 
 
 class Data:
