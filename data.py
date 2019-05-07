@@ -39,8 +39,8 @@ class LinRegResult:
 
     def model(self, y_symbol, x) :
         # TODO fix error propragation!
-        m = Data('m_intern', self.m, self.m_err_stat, self.m_err_sys)
-        c = Data('c_intern', self.c, self.c_err_stat, self.c_err_sys)
+        m = Data('m_intern', self.m, uncert_sys=self.m_err_stat)
+        c = Data('c_intern', self.c, uncert_sys=self.c_err_stat)
         res = ( m*x + c ).consume(y_symbol)
         res.blacklist.remove(m)
         res.blacklist.remove(c)
