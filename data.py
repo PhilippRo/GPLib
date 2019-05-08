@@ -103,8 +103,8 @@ class LinRegResult:
         plt.close()
 
         if tex_file is not None:
-            tex_file.write_section({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
-                'Wert': [self.m, self.c, self.chi_q],
+            tex_file.write_section({'Parameter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
+                'Wert': [self.m, self.c, self.chi_q_over_ndf()],
                 'Stat. Fehler': [self.m_err_stat, self.c_err_stat, "-"],
                 'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]},
                 Description = "Ergebnisse Lineare Regression",
