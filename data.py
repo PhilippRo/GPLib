@@ -63,7 +63,7 @@ class LinRegResult:
         return self.chi_q / self.ndf()
 
     def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
-            tex_file = None, title = None):
+            tex_file = None, title = None, Description = None):
         plt.rcParams.update({'font.size': font_size})
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
@@ -82,7 +82,7 @@ class LinRegResult:
         res_plot.plot(self.xs, np.zeros(len(self.xs)))
         res_plot.errorbar(self.xs, self.ys - self.m * self.xs - self.c, ecolor="r",
             yerr = self.y_err_stat + self.m * self.x_err_stat,
-            capsize=3, elinewidth=1, label = r"Residualgraph $f(x) - y$",
+            capsize=3, elinewidth=1, label = r"Residuengraph $f(x) - y$",
                 fmt='', linewidth=0)
 
         if legend_font_size is None:
@@ -92,7 +92,7 @@ class LinRegResult:
         res_plot.legend(fontsize=legend_font_size)
 
         if title is None:
-            title = "Lineare Regression + Residualplot"
+            title = "Lineare Regression + Residuenplot"
 
         plt.title(title, fontsize=1.3*font_size)
         plt.xlabel(xname, fontsize=font_size)
@@ -100,11 +100,15 @@ class LinRegResult:
 
         plt.savefig(filen+'.eps', bbox_inches = "tight")
 
+        plt.close()
+
         if tex_file is not None:
-            tex_file.write_table({'Paramter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
-                'Wert': [self.m, self.c, self.chi_q],
+            tex_file.write_section({'Parameter': ['m', 'c', '$\\frac{\chi^2}{ndf}$'],
+                'Wert': [self.m, self.c, self.chi_q_over_ndf()],
                 'Stat. Fehler': [self.m_err_stat, self.c_err_stat, "-"],
-                'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]})
+                'Sys. Fehler': [self.m_err_sys, self.c_err_sys, "-"]},
+                Description = "Ergebnisse Lineare Regression",
+                caption= title if title is not None else filen)
 
 
 class Data:
@@ -190,11 +194,21 @@ class Expression:
             [x for x in rhs.blacklist if x not in lhs.blacklist])
 
     def unite_symbols(self, lhs, rhs):
-        self.symbols = lhs.symbols.copy()
-        self.symbols.extend(
-            [x for x in rhs.symbols if x not in lhs.symbols])
-
-        self.unite_blacklist(lhs, rhs)
+        if isinstance( lhs, Data ) or isinstance( lhs, Expression ) :
+            self.symbols = lhs.symbols.copy()
+            if isinstance( rhs, Data ) or isinstance( rhs, Expression ) :
+                self.symbols.extend(
+                    [x for x in rhs.symbols if x not in lhs.symbols])
+                self.unite_blacklist(lhs, rhs)
+            else :
+                self.blacklist = lhs.blacklist.copy()
+        else :
+            if isinstance( rhs, Data ) or isinstance( rhs, Expression ) :
+                self.symbols = rhs.symbols.copy()
+                self.blacklist = rhs.blacklist.copy()
+            else :
+                self.symbols = []
+                self.blacklist = []
         for s in self.symbols:
             if s in self.blacklist :
                 raise ValueError("One or more symbols in blacklist: {}".format(s.symbol))
@@ -270,58 +284,119 @@ class Expression:
 class ExpressionAdd(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() + self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs + rhs
 
 
 
 class ExpressionSub(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() - self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs - rhs
 
 
 
 class ExpressionMul(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() * self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs * rhs
 
 
 class ExpressionDiv(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() / self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs / rhs
 
 
 class ExpressionPow(Expression):
 
     def __init__(self, lhs, rhs):
+        if not (isinstance( lhs, Data ) or isinstance( lhs, Expression ) or isinstance( lhs, numbers.Number )) :
+            raise TypeError("LHS must be either Data, Expression or Number")
+        if not (isinstance( rhs, Data ) or isinstance( rhs, Expression ) or isinstance( rhs, numbers.Number )) :
+            raise TypeError("RHS must be either Data, Expression or Number")
         self.lhs = lhs
         self.rhs = rhs
         self.unite_symbols( lhs, rhs )
 
     def get_sympy_expr(self):
-        return self.lhs.get_sympy_expr() ** self.rhs.get_sympy_expr()
+        if isinstance( self.lhs, Data ) or isinstance( self.lhs, Expression ) :
+            lhs = self.lhs.get_sympy_expr()
+        else :
+            lhs = self.lhs
+        if isinstance( self.rhs, Data ) or isinstance( self.rhs, Expression ) :
+            rhs = self.rhs.get_sympy_expr()
+        else :
+            rhs = self.rhs
+        return lhs ** rhs
+
 
 def GPLog(arg):
     return ExpressionLog(arg)
@@ -353,5 +428,45 @@ class ExpressionCos(Expression):
 
     def __init__(self, expr):
         self.expr = expr
-        self.backlist = expr.blacklist
+        self.blacklist = expr.blacklist
         self.symbols = expr.symbols
+
+    def get_sympy_expr(self):
+        return cos(self.expr.get_sympy_expr())
+
+def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
+        title = None, Description = None, xlines=None, ylines=None, connect=False):
+    plt.rcParams.update({'font.size': font_size})
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+
+    fig = plt.figure(figsize=(20,16))
+    grid = plt.GridSpec(8,8)
+
+    plt.errorbar(x.data, y.data, yerr=y.uncert_stat, xerr=x.uncert_stat,
+            ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
+    if connect :
+        plt.plot( x.data, y.data, color='r' )
+
+
+    if legend_font_size is None:
+        legend_font_size = font_size
+
+    plt.legend(fontsize=legend_font_size)
+
+    if title is None:
+        title = "{} against {}".format( yname, xname)
+
+    plt.title(title, fontsize=1.3*font_size)
+    plt.xlabel(xname, fontsize=font_size)
+    plt.ylabel(yname, fontsize=font_size)
+
+    if not xlines is None :
+        for x in xlines :
+            plt.axvline(x)
+
+    if not ylines is None :
+        for y in ylines :
+            plt.axhline(y)
+
+    plt.savefig(filen+'.eps', bbox_inches = "tight")

@@ -61,9 +61,9 @@ class DataTestCase(unittest.TestCase):
         x_r = Data("xr", np.array([1, 2, 3, 4, 5]),
             uncert_stat = np.array([0.1, 0.12, 0.11, 0.1, 0.1]),
             uncert_sys = np.array([0.1, 0.12, 0.11, 0.1, 0.1]))
-        lr = Calibration( x, x_r )
-        m = lr.slope('m')
-        c = lr.axis_intercept('c')
+        lr = Calibration( x, x_r, 'm' )
+        m = lr.slope()
+        c = lr.axis_intercept()
         lr.save_to_file("test_cali", "x", "xr", 20, tex_file = tex_file, legend_font_size = 10)
 
     def test_error_prop(self):
