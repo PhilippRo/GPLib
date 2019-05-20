@@ -187,27 +187,27 @@ class Data:
     def get_sympy_expr(self):
         return self.symbol
 
-    def __eq__(self, lhs):
-        return self.symbol == lhs.symbol
+    def __eq__(self, rhs):
+        return self.symbol == rhs.symbol
 
-    def __add__(self, lhs):
-        expr = ExpressionAdd(self, lhs)
+    def __add__(self, rhs):
+        expr = ExpressionAdd(self, rhs)
         return expr
 
-    def __sub__(self, lhs):
-        expr = ExpressionSub(self, lhs)
+    def __sub__(self, rhs):
+        expr = ExpressionSub(self, rhs)
         return expr
 
-    def __mul__(self, lhs):
-        expr = ExpressionMul(self, lhs)
+    def __mul__(self, rhs):
+        expr = ExpressionMul(self, rhs)
         return expr
 
-    def __truediv___(self, lhs):
-        expr = ExpressionDiv(self, lhs)
+    def __truediv__(self, rhs):
+        expr = ExpressionDiv(self, rhs)
         return expr
 
-    def __pow__(self, lhs):
-        expr = ExpressionPow(self, lhs)
+    def __pow__(self, rhs):
+        expr = ExpressionPow(self, rhs)
         return expr
 
     def __lt__(self, rhs):
