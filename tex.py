@@ -4,6 +4,9 @@ class TexFile:
     def __init__(self, file_name):
         self.file = open(file_name, "w")
 
+    def __del__(self):
+        self.file.close()
+
     def write_table_column(self, *args):
         self.file.write("       ")
         for i in range(len(args) - 1):
