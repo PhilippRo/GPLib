@@ -82,3 +82,10 @@ def find_peaks(xs, ys, threshold=10, step_size=0.01):
                 max(weed_out, key = lambda x: x[2])[2] ))
 
     return get_error(npeaks)
+
+def peak_height(xs, ys, x_peak, y_name ):
+    data = list( zip( xs.data, xs.uncert_stat, xs.uncert_sys, ys.data, ys.uncert_stat, ys.uncert_sys ) )
+    key = lambda x: abs(x[0] - x_peak.data)
+    peak = min( *data, key=key )
+    y_peak = Data( y_name, peak[3], peak[4], peak[5] )
+    return (x_peak, y_peak)
