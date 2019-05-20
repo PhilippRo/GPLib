@@ -8,30 +8,16 @@ from data import ExpressionSub
 from praktikum import analyse
 
 class Calibration:
-    def __init__( self, x_m, x_r, c_symbol ):
-        x_m = copy.deepcopy(x_m)
-        x_r = copy.deepcopy(x_r)
-        if isinstance( x_m.data, np.ndarray ) :
-            x_m.uncert_sys = np.zeros(len(x_m.data))
+    def __init__( self, x_m, x_r, m_symbol ):
+        self.mes = copy.deepcopy(x_m)
+        self.real = copy.deepcopy(x_r)
+        if isinstance( self.mes.data, np.ndarray ) :
+            self.mes.uncert_sys = np.zeros(len(self.mes.data))
         else :
-            x_m.uncert_sys = 0
-
-        if isinstance( x_m, Expression ) :
-            self.mes_mittel = analyse.mittelwert_stdabw( x_m.consume().data )[0]
-            self.mes = x_m - self.mes_mittel
-        else :
-            self.mes_mittel = analyse.mittelwert_stdabw( x_m.data )[0]
-            self.mes = Expression( x_m ) - self.mes_mittel
-        if isinstance( x_r, Expression ) :
-            self.real_mittel = analyse.mittelwert_stdabw( x_r.consume().data )[0]
-            self.real = x_r - self.real_mittel
-        else :
-            self.real_mittel = analyse.mittelwert_stdabw( x_r.data )[0]
-            self.real = Expression( x_r ) - self.real_mittel
+            self.mes.uncert_sys = 0
 
         self.result = self.mes < self.real
-        self.m = self.result.slope( c_symbol )
-        self.c = ExpressionSub( self.real_mittel, self.m * self.mes_mittel )
+        self.m, self.c = self.result.params( m_symbol )
 
     def calibrate( self, x, x_name ) :
         x = copy.deepcopy(x)
@@ -40,7 +26,7 @@ class Calibration:
         else :
             x.uncert_sys = 0
         m = Data('m_intern', self.m.data, uncert_sys=np.sqrt( self.m.uncert_stat**2 + self.m.uncert_sys**2 ))
-        c = self.c.consume("c_intern")
+        c = self.c.consume()
         c = Data('c_intern', c.data, uncert_sys=np.sqrt( c.uncert_stat**2 + c.uncert_sys**2 ))
         res = ( m*x + c ).consume(x_name)
         res.blacklist.remove(m)

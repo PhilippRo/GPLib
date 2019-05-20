@@ -1,34 +1,46 @@
 
 from util import quad_add
 from tex import TexFile
+from deprecated import deprecated as depr
 from sympy import *
 import matplotlib.pyplot as plt
 import numpy as np
 import numbers
 
-from praktikum.analyse import lineare_regression, lineare_regression_xy
+from praktikum.analyse import mittelwert_stdabw, lineare_regression, lineare_regression_xy
 
 tex_file = TexFile("tex_file.tex")
 
 class LinRegResult:
 
-    def __init__( self, xs, ys ):
+    def __init__( self, xs, ys, remove_cov=True ):
         if not isinstance( xs, Data ) :
             xs = xs.consume("xs", tex_file)
         if not isinstance( ys, Data ) :
             ys = ys.consume("ys", tex_file)
+
+        self.xs = xs.data
+        self.ys = ys.data
+        self.x_err_stat = xs.uncert_stat
+        self.x_err_sys = xs.uncert_sys
+        self.y_err_stat = ys.uncert_stat
+        self.y_err_sys = ys.uncert_sys
+
+        self.remove_cov = remove_cov
+        if remove_cov :
+            self.xs_mittel = mittelwert_stdabw( xs.data )[0]
+            xs = (xs - self.xs_mittel).consume('x')
+            self.ys_mittel = mittelwert_stdabw( ys.data )[0]
+            ys = (ys - self.ys_mittel).consume('y')
+        else :
+            self.xs_mittel = 0
+            self.ys_mittel = 0
 
         if (xs.uncert_stat == np.zeros(len(xs.uncert_stat))).all():
             m, m_stat, c, c_stat, chi_q, _ = lineare_regression(xs.data, ys.data, ys.uncert_stat)
             m1, _, c1, _, _, _ = lineare_regression(xs.data, ys.data + ys.uncert_sys, ys.uncert_stat)
             m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
 
-            self.xs = xs.data
-            self.ys = ys.data
-            self.x_err_stat = xs.uncert_stat
-            self.x_err_sys = xs.uncert_sys
-            self.y_err_stat = ys.uncert_stat
-            self.y_err_sys = ys.uncert_sys
             self.chi_q = chi_q
             self.m = m
             self.m_err_sys = (np.abs(m2 - m) + np.abs(m - m1)) * 0.5
@@ -45,12 +57,6 @@ class LinRegResult:
             m3, _, c3, _, _, _ = lineare_regression_xy(xs.data, ys.data + ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
             m4, _, c4, _, _, _ = lineare_regression_xy(xs.data, ys.data - ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
 
-            self.xs = xs.data
-            self.ys = ys.data
-            self.x_err_stat = xs.uncert_stat
-            self.x_err_sys = xs.uncert_sys
-            self.y_err_stat = ys.uncert_stat
-            self.y_err_sys = ys.uncert_sys
             self.chi_q = chi_q
             self.m = m
             self.m_err_sys = quad_add([np.abs(m2 - m) + np.abs(m - m1), np.abs(m4 - m) + np.abs(m - m3)]) * 0.5
@@ -60,16 +66,28 @@ class LinRegResult:
             self.c_err_stat = c_stat
             self.blacklist = xs.blacklist + ys.blacklist
 
+    @depr("slope is deprecated, use params instead")
     def slope(self, symbol) :
         return Data(symbol, self.m, uncert_stat=self.m_err_stat, uncert_sys=self.m_err_sys, blacklist=self.blacklist)
 
+    @depr("axis_intercept is deprecated, use params instead")
     def axis_intercept(self, symbol) :
         return Data(symbol, self.c, uncert_stat=self.c_err_stat, uncert_sys=self.c_err_sys, blacklist=self.blacklist)
 
+    def params(self, m_symbol, c_symbol=None) :
+        m = Data(m_symbol, self.m, uncert_stat=self.m_err_stat, uncert_sys=self.m_err_sys, blacklist=self.blacklist)
+        if self.remove_cov :
+            c = ExpressionSub( self.ys_mittel, self.m * self.xs_mittel )
+        else :
+            c = Data(c_symbol, self.c, uncert_stat=self.c_err_stat, uncert_sys=self.c_err_sys, blacklist=self.blacklist)
+        return m, c
+
     def model(self, y_symbol, x) :
-        # TODO fix error propragation!
-        m = Data('m_intern', self.m, uncert_sys=self.m_err_stat)
-        c = Data('c_intern', self.c, uncert_sys=self.c_err_stat)
+        m, c = self.params('m_intern', 'c_intern')
+        m = Data('m_intern', m.data, uncert_sys=np.sqrt( m.uncert_stat**2 + m.uncert_sys**2 ))
+        if not isinstance( c, Data ):
+            c = c.consume('c_intern')
+        c = Data('c_intern', c.data, uncert_sys=np.sqrt( c.uncert_stat**2 + c.uncert_sys**2 ))
         res = ( m*x + c ).consume(y_symbol)
         res.blacklist.remove(m)
         res.blacklist.remove(c)
@@ -78,11 +96,15 @@ class LinRegResult:
     def y_model(self, name) :
         x = Data('x_intern', self.xs, self.x_err_stat, self.x_err_sys)
         m = Data('m_intern', self.m)
-        c = Data('c_intern', self.c)
+        if self.remove_cov :
+            c = ExpressionSub( self.ys_mittel, self.m * self.xs_mittel )
+        else :
+            c = Data('c_intern', self.c)
         res = ( m*x + c ).consume(name)
         res.blacklist.remove(x)
         res.blacklist.remove(m)
-        res.blacklist.remove(c)
+        if not self.remove_cov :
+            res.blacklist.remove(c)
         return res
 
     def ndf( self ):
@@ -103,13 +125,13 @@ class LinRegResult:
         res_plot = fig.add_subplot(grid[-2:, :])
         data_plot = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
 
-        data_plot.plot(self.xs, self.m * self.xs + self.c, label=r'Fit', color='g', marker='', linewidth=4)
+        data_plot.plot(self.xs, self.y_model('y_intern').data, label=r'Fit', color='g', marker='', linewidth=4)
         data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
                 ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
 
 
         res_plot.plot(self.xs, np.zeros(len(self.xs)))
-        res_plot.errorbar(self.xs, self.ys - self.m * self.xs - self.c, ecolor="r",
+        res_plot.errorbar(self.xs, self.ys - self.y_model('y_intern').data, ecolor="r",
             yerr = self.y_err_stat + self.m * self.x_err_stat,
             capsize=3, elinewidth=1, label = r"Residuengraph $f(x) - y$",
                 fmt='', linewidth=0)
