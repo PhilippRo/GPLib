@@ -12,24 +12,53 @@ tex_file = TexFile("tex_file.tex")
 
 class LinRegResult:
 
-    def __init__(self, xs, ys, x_err_stat, y_err_stat,
-            x_err_sys, y_err_sys, chi_q, m, m_err_stat,
-            m_err_sys, c, c_err_stat, c_err_sys,
-            blacklist ):
-        self.xs = xs
-        self.ys = ys
-        self.x_err_stat = x_err_stat
-        self.x_err_sys = x_err_sys
-        self.y_err_stat = y_err_stat
-        self.y_err_sys = y_err_sys
-        self.chi_q = chi_q
-        self.m = m
-        self.m_err_sys = m_err_sys
-        self.m_err_stat = m_err_stat
-        self.c = c
-        self.c_err_sys = c_err_sys
-        self.c_err_stat = c_err_stat
-        self.blacklist = blacklist
+    def __init__( self, xs, ys ):
+        if not isinstance( xs, Data ) :
+            xs = xs.consume("xs", tex_file)
+        if not isinstance( ys, Data ) :
+            ys = ys.consume("ys", tex_file)
+
+        if (xs.uncert_stat == np.zeros(len(xs.uncert_stat))).all():
+            m, m_stat, c, c_stat, chi_q, _ = lineare_regression(xs.data, ys.data, ys.uncert_stat)
+            m1, _, c1, _, _, _ = lineare_regression(xs.data, ys.data + ys.uncert_sys, ys.uncert_stat)
+            m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
+
+            self.xs = xs.data
+            self.ys = ys.data
+            self.x_err_stat = xs.uncert_stat
+            self.x_err_sys = xs.uncert_sys
+            self.y_err_stat = ys.uncert_stat
+            self.y_err_sys = ys.uncert_sys
+            self.chi_q = chi_q
+            self.m = m
+            self.m_err_sys = (np.abs(m2 - m) + np.abs(m - m1)) * 0.5
+            self.m_err_stat = m_stat
+            self.c = c
+            self.c_err_sys = (np.abs(c2 - c) + np.abs(c - c1)) * 0.5
+            self.c_err_stat = c_stat
+            self.blacklist = xs.blacklist + ys.blacklist
+
+        else:
+            m, m_stat, c, c_stat, chi_q, _ = lineare_regression_xy(xs.data, ys.data, xs.uncert_stat, ys.uncert_stat)
+            m1, _, c1, _, _, _ = lineare_regression_xy(xs.data + xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
+            m2, _, c2, _, _, _ = lineare_regression_xy(xs.data - xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
+            m3, _, c3, _, _, _ = lineare_regression_xy(xs.data, ys.data + ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
+            m4, _, c4, _, _, _ = lineare_regression_xy(xs.data, ys.data - ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
+
+            self.xs = xs.data
+            self.ys = ys.data
+            self.x_err_stat = xs.uncert_stat
+            self.x_err_sys = xs.uncert_sys
+            self.y_err_stat = ys.uncert_stat
+            self.y_err_sys = ys.uncert_sys
+            self.chi_q = chi_q
+            self.m = m
+            self.m_err_sys = quad_add([np.abs(m2 - m) + np.abs(m - m1), np.abs(m4 - m) + np.abs(m - m3)]) * 0.5
+            self.m_err_stat = m_stat
+            self.c = c
+            self.c_err_sys = quad_add([np.abs(c2 - c) + np.abs(c - c1), np.abs(c4 - c) + np.abs(c - c3)]) * 0.5
+            self.c_err_stat = c_stat
+            self.blacklist = xs.blacklist + ys.blacklist
 
     def slope(self, symbol) :
         return Data(symbol, self.m, uncert_stat=self.m_err_stat, uncert_sys=self.m_err_sys, blacklist=self.blacklist)
@@ -159,6 +188,9 @@ class Data:
         expr = ExpressionPow(self, lhs)
         return expr
 
+    def __lt__(self, rhs):
+        return LinRegResult( self, rhs  )
+
     def __str__(self):
         if isinstance( self.data, np.ndarray ):
             out = "{} = [\n".format(self.symbol)
@@ -230,30 +262,7 @@ class Expression:
 
     #lineare regression
     def __lt__(self, rhs):
-        xs = self.consume("xs", tex_file)
-        ys = rhs.consume("ys", tex_file)
-        if (xs.uncert_stat == np.zeros(len(xs.uncert_stat))).all():
-            m, m_stat, c, c_stat, chi_q, _ = lineare_regression(xs.data, ys.data, ys.uncert_stat)
-            m1, _, c1, _, _, _ = lineare_regression(xs.data, ys.data + ys.uncert_sys, ys.uncert_stat)
-            m2, _, c2, _, _, _ = lineare_regression(xs.data, ys.data - ys.uncert_sys, ys.uncert_stat)
-            return LinRegResult(xs.data, ys.data, xs.uncert_stat,
-                ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
-                chi_q,
-                m, m_stat, (np.abs(m2 - m) + np.abs(m - m1)) * 0.5,
-                c, c_stat, (np.abs(c2 - c) + np.abs(c - c1)) * 0.5,
-                blacklist=xs.blacklist + ys.blacklist )
-        else:
-            m, m_stat, c, c_stat, chi_q, _ = lineare_regression_xy(xs.data, ys.data, xs.uncert_stat, ys.uncert_stat)
-            m1, _, c1, _, _, _ = lineare_regression_xy(xs.data + xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
-            m2, _, c2, _, _, _ = lineare_regression_xy(xs.data - xs.uncert_sys, ys.data, xs.uncert_stat, ys.uncert_stat)
-            m3, _, c3, _, _, _ = lineare_regression_xy(xs.data, ys.data + ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
-            m4, _, c4, _, _, _ = lineare_regression_xy(xs.data, ys.data - ys.uncert_sys, xs.uncert_stat, ys.uncert_stat)
-            return LinRegResult(xs.data, ys.data, xs.uncert_stat,
-                ys.uncert_stat, xs.uncert_sys, ys.uncert_sys,
-                chi_q,
-                m, m_stat, quad_add([np.abs(m2 - m) + np.abs(m - m1), np.abs(m4 - m) + np.abs(m - m3)]) * 0.5,
-                c, c_stat, quad_add([np.abs(c2 - c) + np.abs(c - c1), np.abs(c4 - c) + np.abs(c - c3)]) * 0.5,
-                blacklist=xs.blacklist + ys.blacklist )
+        return LinRegResult( self, rhs  )
 
     def consume(self, name , tex_file = None):
         expr = self.get_sympy_expr()
