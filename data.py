@@ -226,8 +226,6 @@ class Data:
             out += "({} +- {} +- {})".format(self.data, self.uncert_stat, self.uncert_sys)
             return out
 
-
-
 class Expression:
 
     def __init__(self, data):
@@ -464,6 +462,19 @@ class ExpressionCos(Expression):
 
     def get_sympy_expr(self):
         return cos(self.expr.get_sympy_expr())
+
+def unite( data, symbol ) :
+    ret_data = np.ndarray( len(data) )
+    ret_uncert_stat = np.ndarray( len(data) )
+    ret_uncert_sys = np.ndarray( len(data) )
+    for i,d in enumerate( data ):
+        if not isinstance( d, Data ) :
+            d = d.consume( 'temp' )
+        ret_data[i] = d.data
+        ret_uncert_stat[i] = d.uncert_stat
+        ret_uncert_sys[i] = d.uncert_sys
+    data = Data( symbol, ret_data, ret_uncert_stat, ret_uncert_sys )
+    return data
 
 def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
         title = None, Description = None, xlines=None, ylines=None, connect=False):
