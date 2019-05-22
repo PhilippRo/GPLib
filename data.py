@@ -6,6 +6,7 @@ from sympy import *
 import matplotlib.pyplot as plt
 import numpy as np
 import numbers
+from collections.abc import Iterable
 
 from praktikum.analyse import mittelwert_stdabw, lineare_regression, lineare_regression_xy
 
@@ -485,10 +486,15 @@ def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
     fig = plt.figure(figsize=(20,16))
     grid = plt.GridSpec(8,8)
 
-    plt.errorbar(x.data, y.data, yerr=y.uncert_stat, xerr=x.uncert_stat,
+    if isinstance( y, Iterable ):
+        for y_i in y:
+            plt.errorbar(x.data, y_i.data, yerr=y_i.uncert_stat, xerr=x.uncert_stat,
+                capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
+    else :
+        plt.errorbar(x.data, y.data, yerr=y.uncert_stat, xerr=x.uncert_stat,
             ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
-    if connect :
-        plt.plot( x.data, y.data, color='r' )
+        if connect :
+            plt.plot( x.data, y.data, color='r' )
 
 
     if legend_font_size is None:
