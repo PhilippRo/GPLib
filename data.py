@@ -465,16 +465,22 @@ class ExpressionCos(Expression):
         return cos(self.expr.get_sympy_expr())
 
 def unite( data, symbol ) :
-    ret_data = np.ndarray( len(data) )
-    ret_uncert_stat = np.ndarray( len(data) )
-    ret_uncert_sys = np.ndarray( len(data) )
+    ret_data = []
+    ret_uncert_stat = []
+    ret_uncert_sys = []
     for i,d in enumerate( data ):
         if not isinstance( d, Data ) :
             d = d.consume( 'temp' )
-        ret_data[i] = d.data
-        ret_uncert_stat[i] = d.uncert_stat
-        ret_uncert_sys[i] = d.uncert_sys
-    data = Data( symbol, ret_data, ret_uncert_stat, ret_uncert_sys )
+        print(d)
+        if isinstance( d.data, np.ndarray):
+            ret_data.extend( iter(d.data) )
+            ret_uncert_stat.extend( iter(d.uncert_stat) )
+            ret_uncert_sys.extend( iter(d.uncert_sys) )
+        else :
+            ret_data.append( d.data )
+            ret_uncert_stat.append( d.uncert_stat )
+            ret_uncert_sys.append( d.uncert_sys )
+    data = Data( symbol, np.array(ret_data), np.array(ret_uncert_stat), np.array(ret_uncert_sys) )
     return data
 
 def scatter( x, y, filen, xname, yname, font_size, legend_font_size = None,
