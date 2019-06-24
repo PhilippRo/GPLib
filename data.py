@@ -128,25 +128,18 @@ class LinRegResult:
 
         data_plot.plot(self.xs, self.y_model('y_intern').data, label=r'Fit', color='g', marker='', linewidth=4)
         data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
-                ecolor='r', capsize =  2, elinewidth=2, linewidth=0, label=r"Daten")
+                ecolor='r', capsize =  2, elinewidth=2, linewidth=0)
 
 
         res_plot.plot(self.xs, np.zeros(len(self.xs)))
         res_plot.errorbar(self.xs, self.ys - self.y_model('y_intern').data, ecolor="r",
             yerr = self.y_err_stat + self.m * self.x_err_stat,
-            capsize=3, elinewidth=1, label = r"Residuengraph $f(x) - y$",
-                fmt='', linewidth=0)
+            capsize=3, elinewidth=1,
+            fmt='', linewidth=0)
 
-        if legend_font_size is None:
-            legend_font_size = font_size
+        if not title is None:
+            plt.title(title, fontsize=1.3*font_size)
 
-        data_plot.legend(fontsize=legend_font_size)
-        res_plot.legend(fontsize=legend_font_size)
-
-        if title is None:
-            title = "Lineare Regression + Residuenplot"
-
-        plt.title(title, fontsize=1.3*font_size)
         plt.xlabel(xname, fontsize=font_size)
         plt.ylabel(yname, fontsize=font_size)
 
