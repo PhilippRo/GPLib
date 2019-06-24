@@ -40,10 +40,10 @@ class Calibration:
         return self.c
 
     def ndf( self ):
-        return len(self.xs) - 2
+        return self.result.ndf()
 
     def chi_q_over_ndf( self ) :
-        return self.chi_q / self.ndf()
+        return self.result.chi_q_over_ndf()
 
     def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
             tex_file = None, title = None):
