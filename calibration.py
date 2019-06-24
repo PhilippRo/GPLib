@@ -39,6 +39,12 @@ class Calibration:
     def axis_intercept(self) :
         return self.c
 
+    def ndf( self ):
+        return len(self.xs) - 2
+
+    def chi_q_over_ndf( self ) :
+        return self.chi_q / self.ndf()
+
     def save_to_file(self, filen, xname, yname, font_size, legend_font_size = None,
             tex_file = None, title = None):
         return self.result.save_to_file(
