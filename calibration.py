@@ -26,7 +26,7 @@ class Calibration:
         else :
             x.uncert_sys = 0
         m = Data('m_intern', self.m.data, uncert_sys=np.sqrt( self.m.uncert_stat**2 + self.m.uncert_sys**2 ))
-        c = self.c.consume()
+        c = self.c.consume('c_intern')
         c = Data('c_intern', c.data, uncert_sys=np.sqrt( c.uncert_stat**2 + c.uncert_sys**2 ))
         res = ( m*x + c ).consume(x_name)
         res.blacklist.remove(m)
