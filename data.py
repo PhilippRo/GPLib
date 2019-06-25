@@ -126,15 +126,15 @@ class LinRegResult:
         res_plot = fig.add_subplot(grid[-2:, :])
         data_plot = fig.add_subplot(grid[:-3:, :], sharex = res_plot)
 
-        data_plot.plot(self.xs, self.y_model('y_intern').data, label=r'Fit', color='g', marker='', linewidth=4)
+        data_plot.plot(self.xs, self.y_model('y_intern').data, label=r'Fit', color='g', marker=' ', linewidth=2)
         data_plot.errorbar(self.xs, self.ys, yerr=self.y_err_stat, xerr=self.x_err_stat,
-                ecolor='r', capsize =  2, elinewidth=2, linewidth=0)
+                color='r', capsize =  2, elinewidth=2, linewidth=0, marker='.', markersize=10)
 
 
         res_plot.plot(self.xs, np.zeros(len(self.xs)))
-        res_plot.errorbar(self.xs, self.ys - self.y_model('y_intern').data, ecolor="r",
+        res_plot.errorbar(self.xs, self.ys - self.y_model('y_intern').data, color="r",
             yerr = self.y_err_stat + self.m * self.x_err_stat,
-            capsize=3, elinewidth=1,
+            capsize=3, elinewidth=1, marker='.', markersize=10,
             fmt='', linewidth=0)
 
         if not title is None:
