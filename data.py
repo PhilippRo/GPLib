@@ -78,7 +78,7 @@ class LinRegResult:
     def params(self, m_symbol, c_symbol=None) :
         m = Data(m_symbol, self.m, uncert_stat=self.m_err_stat, uncert_sys=self.m_err_sys, blacklist=self.blacklist)
         if self.remove_cov :
-            c = ExpressionSub( self.ys_mittel, self.m * self.xs_mittel )
+            c = ExpressionSub( self.ys_mittel, m * self.xs_mittel )
         else :
             c = Data(c_symbol, self.c, uncert_stat=self.c_err_stat, uncert_sys=self.c_err_sys, blacklist=self.blacklist)
         return m, c
